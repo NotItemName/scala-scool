@@ -28,23 +28,13 @@ trait SimpleParser[+T] extends Parser[T] {
   }
 
   def acceptNumber: Parser[String] = new Parser[String] {
-    val pattern = "[0-9]".r
+    val pattern = """(^[-+]?[0-9]*\.?[0-9]+)""".r
 
     override def apply(in: String): Result[String] = {
-      OptionalString(in).getFirst match {
-        case Some(first) => pattern findFirstIn first.toString match {
-          case Some(string) => apply(in.substring(1)).map(x => string + x)
-          case None => Success("", in)
-        }
-        case None => Success("", in)
+      pattern findFirstIn in.toString match {
+        case Some(first) if in.startsWith(first) => Success(first, in.replace(first, ""))
+        case None => Failure("empty string", in)
       }
-    }
-  }
-
-  def acceptStartWith(str: String): Parser[String] = new Parser[String] {
-    override def apply(in: String): Result[String] = {
-      if (in.startsWith(str)) Success(str, in.replace(str, ""))
-      else Failure("expected -> " + str, in)
     }
   }
 }

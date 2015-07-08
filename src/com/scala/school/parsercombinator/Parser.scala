@@ -56,7 +56,7 @@ trait Parser[+T] extends (String => Result[T]) {
 
   def repeat[T](p: => Parser[T], splitter: String): Parser[List[T]] = new Parser[List[T]] {
     override def apply(in: String): Result[List[T]] = p(in) match {
-      case Success(elem, rest) => apply(rest).map(x => (elem :: x))
+      case Success(elem, rest) => apply(rest).map(x => elem :: x)
       case _ if in.startsWith(splitter) => apply(in.drop(splitter.length))
       case _ => Success(Nil, in)
     }
